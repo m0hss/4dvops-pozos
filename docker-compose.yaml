@@ -1,0 +1,45 @@
+version: '3.7'
+services:
+  jenkins:
+    image: dirane/jenkins-docker-ansible-clair
+    restart: always
+    ports:
+      - '8080'
+      - '8443'
+      - '50000'
+
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'gitlab.pozos.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+            external_url 'http://gitlab.pozos.com'
+    ports:
+      - '80'
+      - '443'
+      - '22'
+    volumes:
+      - '$GITLAB_HOME/gitlab/config:/etc/gitlab'
+      - '$GITLAB_HOME/gitlab/logs:/var/log/gitlab'
+      - '$GITLAB_HOME/gitlab/data:/var/opt/gitlab'   
+  Website:
+    image: php:7.2-apache-stretch
+    volumes:
+      - webdata:/var/www/html
+    environment:
+      - USERNAME
+      - PASSWORD
+    depends_on:
+       - API
+    ports:
+       - 80:80
+  API:
+    image: pozos
+    volumes:
+      - mydata:/data
+    ports:
+      - 5000
+volumes:
+  webdata:
+  mydata:
